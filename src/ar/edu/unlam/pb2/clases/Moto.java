@@ -4,17 +4,42 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 import ar.edu.unlam.pb2.enums.MarcaEnum;
+import ar.edu.unlam.pb2.exceptions.CascoAsignadoException;
+import ar.edu.unlam.pb2.exceptions.DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException;
+import ar.edu.unlam.pb2.interfaces.Asignable;
 
-public class Moto extends Vehiculo {
-
+public class Moto extends Vehiculo implements Asignable{
+	private Casco casco;
 	public Moto(String patente, MarcaEnum marca, LocalDateTime horaIngreso) {
 		super(patente, marca, horaIngreso);
+		this.casco = null;
 	}
 
 	@Override
-	public Double calcularCosto() {
-		double minutosExactos = Duration.between(getHoraIngreso(), getHoraSalida()).toSeconds();
+	public Double calcularCosto(LocalDateTime horaDeSalida) throws DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException {
+		if(getCasco() == null) {
+			throw new DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException();
+		}
+		double minutosExactos = Duration.between(getHoraIngreso(), horaDeSalida).toMinutes();
 		Double costo = (minutosExactos / 60.0) * 500.0;
 		return costo;
 	}
+
+	@Override
+	public Boolean asignarCasco(Casco casco) throws CascoAsignadoException {
+		if(getCasco() == null) {
+			setCasco(casco);
+			return true;
+		}
+		throw new CascoAsignadoException();
+	}
+
+	public Casco getCasco() {
+		return casco;
+	}
+
+	public void setCasco(Casco casco) {
+		this.casco = casco;
+	}
+	
 }
