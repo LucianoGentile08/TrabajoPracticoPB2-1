@@ -14,151 +14,68 @@ import ar.edu.unlam.pb2.exceptions.CocheraInexistenteException;
 import ar.edu.unlam.pb2.exceptions.CocheraNoEncontradaException;
 import ar.edu.unlam.pb2.exceptions.CocheraOcupadaException;
 import ar.edu.unlam.pb2.exceptions.DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException;
-import ar.edu.unlam.pb2.exceptions.PagoNoEncontradoException;
 import ar.edu.unlam.pb2.exceptions.PatenteDuplicadaException;
 import ar.edu.unlam.pb2.exceptions.VehiculoInvalidoParaAsignarCasco;
 import ar.edu.unlam.pb2.exceptions.VehiculoNoSeEncuentraEnCochera;
+import ar.edu.unlam.pb2.exceptions.VehiculoNuloException;
 import ar.edu.unlam.pb2.interfaces.Asignable;
 
 public class Estacionamiento {
 
 	private Map<Integer, Vehiculo> cocheras;
-	private Set<Vehiculo> vehiculos;
 	private List<Pago> pagos;
 
 	public Estacionamiento() {
 		this.cocheras = new HashMap<Integer, Vehiculo>();
-		this.vehiculos = new HashSet<>();
 		this.pagos = new ArrayList<>();
 	}
 
 	public Boolean estacionarVehiculo(Integer idCochera, Vehiculo vehiculo)
 			throws CocheraOcupadaException, PatenteDuplicadaException, CocheraInexistenteException {
-		validarPatenteDuplicada(vehiculo);
-		validarCocheraOcupada(idCochera);
-		validarCocheraInexistente(idCochera);
+		validacionesAlEstacionar(idCochera, vehiculo);
 		this.cocheras.put(idCochera, vehiculo);
 		return true;
 	}
 
-	public void validarCocheraOcupada(Integer idCochera) throws CocheraOcupadaException {
-		if (cocheras.containsKey(idCochera)) {
-			throw new CocheraOcupadaException("Cochera ocupada");
-		}
-	}
-
-	public void validarPatenteDuplicada(Vehiculo vehiculo) throws PatenteDuplicadaException {
-		for (Vehiculo vehiculoEncontrado : cocheras.values()) {
-			if (vehiculoEncontrado.getPatente().equals(vehiculo.getPatente())) {
-				throw new PatenteDuplicadaException("Patente duplicada");
-			}
-		}
-	}
-
-	public void validarCocheraInexistente(Integer idCochera) throws CocheraInexistenteException {
-		if (idCochera <= 0 || idCochera > 100) {
-			throw new CocheraInexistenteException("Cochera inexistente");
-		}
+	public Map<Integer, Vehiculo> cambiarVehiculoDeCochera(Integer idCocheraOrigen, Vehiculo vehiculo,
+			Integer idCocheraDestino) throws CocheraOcupadaException, CocheraInexistenteException,
+			VehiculoNoSeEncuentraEnCochera, VehiculoNuloException {
+		validacionesAlCambiarVehiculoDeCochera(idCocheraOrigen, vehiculo, idCocheraDestino);
+		Map<Integer, Vehiculo> cocheraDeOrigen = new HashMap<Integer, Vehiculo>();
+		cocheras.put(idCocheraDestino, vehiculo);
+		cocheras.replace(idCocheraOrigen, null);
+		cocheraDeOrigen.put(idCocheraOrigen, null);
+		return cocheraDeOrigen;
 	}
 
 	public Boolean asignarCascoAUnTipoDeVehiculo(Vehiculo vehiculo, Casco casco)
 			throws CascoAsignadoException, VehiculoInvalidoParaAsignarCasco {
-		if (vehiculo instanceof Asignable) {
+		if (vehiculo instanceof Asignable)
 			return ((Asignable) vehiculo).asignarCasco(casco);
-		}
 		throw new VehiculoInvalidoParaAsignarCasco();
 	}
 
-	public Boolean cambiarVehiculoDeCochera(Integer idCocheraOrigen, Vehiculo vehiculo, Integer idCocheraDestino)
-			throws CocheraOcupadaException, CocheraInexistenteException, VehiculoNoSeEncuentraEnCochera {
-
-		validarCocheraInexistente(idCocheraOrigen);
-
-		validarCocheraInexistente(idCocheraDestino);
-
-		validarVehiculoEstacionadoEnCochera(idCocheraOrigen, vehiculo);
-
-		validarCocheraOcupada(idCocheraDestino);
-
-		if (vehiculo != null) {
-			cocheras.replace(idCocheraOrigen, null);
-			cocheras.put(idCocheraDestino, vehiculo);
-			return true;
-		}
-		return false;
-	}
-
-	private void validarVehiculoEstacionadoEnCochera(Integer idCocheraOrigen, Vehiculo vehiculo)
-			throws VehiculoNoSeEncuentraEnCochera {
-
-		if (!cocheras.containsKey(idCocheraOrigen) || !cocheras.containsValue(vehiculo)) {
-			throw new VehiculoNoSeEncuentraEnCochera();
-		}
-	}
-
-	public Map<String, Double> generarReporteDePagos(LocalDateTime fecha)
-			throws DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException {
-		HashMap<String, Double> reporte = new HashMap<String, Double>();
-		Double costoAuto = 0.0;
-		Double costoMoto = 0.0;
-		Double costoCamioneta = 0.0;
-		Double costoCuatri = 0.0;
-
-		for (Pago pago : pagos) {
-			if (pago.getVehiculo() instanceof Moto) {
-				costoMoto += pago.getMonto();
-			}
-			if (pago.getVehiculo() instanceof Cuatriciclo) {
-				costoCuatri += pago.getMonto();
-			}
-			if (pago.getVehiculo() instanceof Auto) {
-				costoAuto += pago.getMonto();
-			}
-			if (pago.getVehiculo() instanceof Camioneta) {
-				costoCamioneta += pago.getMonto();
-			}
-		}
-
-		reporte.put("Auto", costoAuto);
-		reporte.put("Moto", costoMoto);
-		reporte.put("Camioneta", costoCamioneta);
-		reporte.put("Cuatriciclo", costoCuatri);
-
-		return reporte;
-
-	}
-
-	public Boolean pagarEnSalida(Integer idCochera, LocalDateTime fechaSalida, Vehiculo vehiculo,
+	public Pago calcularPago(Integer idCochera, LocalDateTime fechaSalida, Vehiculo vehiculo,
 			MedioDePagoEnum medioDePago)
-			throws DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException, VehiculoNoSeEncuentraEnCochera {
-
+			throws VehiculoNoSeEncuentraEnCochera, DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException {
 		validarVehiculoEstacionadoEnCochera(idCochera, vehiculo);
-
 		Double costo = vehiculo.calcularCosto(fechaSalida);
-		Double montoFinal = aplicarDescuesto(medioDePago, costo);
-		Pago pago = new Pago(vehiculo, montoFinal, medioDePago, fechaSalida);
-
+		Double costoFinal = aplicarDescuesto(medioDePago, costo);
+		Pago pago = new Pago(vehiculo, costoFinal, medioDePago, fechaSalida);
 		cocheras.replace(idCochera, null);
-
-		return this.pagos.add(pago);
-
+		return pago;
 	}
 
 	private Double aplicarDescuesto(MedioDePagoEnum medioDePago, Double costo) {
 		Double montoFinal = costo;
-		if (MedioDePagoEnum.EFECTIVO.equals(medioDePago)) {
+		if (MedioDePagoEnum.EFECTIVO.equals(medioDePago))
 			montoFinal = (costo * 0.90);
-		}
 		return montoFinal;
 	}
 
-	public Pago buscarPagoPorFechaExacta(LocalDateTime fecha) throws PagoNoEncontradoException {
-		for (Pago pagoEncontrado : pagos) {
-			if (pagoEncontrado.getFecha().equals(fecha))
-				return pagoEncontrado;
-		}
-		throw new PagoNoEncontradoException();
-
+	public Boolean realizarPago(Pago pago)
+			throws DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException, VehiculoNoSeEncuentraEnCochera {
+		return this.pagos.add(pago);
 	}
 
 	public Map<Integer, Vehiculo> buscarCochera(Integer idCochera) throws CocheraNoEncontradaException {
@@ -168,6 +85,86 @@ public class Estacionamiento {
 			return cocheraLiberada;
 		}
 		throw new CocheraNoEncontradaException();
+	}
+	
+	public Map<String, Double> generarReporteDeLaRecaudacion() {
+		Map<String, Double> reporteDeLaRecaudacion = new HashMap <String, Double>();
+		Double costoAuto = 0.0;
+		Double costoMoto = 0.0;
+		Double costoCamioneta = 0.0;
+		Double costoCuatri = 0.0;
+		for (Pago pago : pagos) {
+			if (pago.getVehiculo() instanceof Moto)
+				costoMoto += pago.getMonto();
+			if (pago.getVehiculo() instanceof Cuatriciclo)
+				costoCuatri += pago.getMonto();
+			if (pago.getVehiculo() instanceof Auto)
+				costoAuto += pago.getMonto();
+			if (pago.getVehiculo() instanceof Camioneta)
+				costoCamioneta += pago.getMonto();
+		}
+		reporteDeLaRecaudacion.put("Auto", costoAuto);
+		reporteDeLaRecaudacion.put("Moto", costoMoto);
+		reporteDeLaRecaudacion.put("Camioneta", costoCamioneta);
+		reporteDeLaRecaudacion.put("Cuatriciclo", costoCuatri);
+		return reporteDeLaRecaudacion;
+	}
+	
+	public List<Vehiculo> obtenerVehiculosEstacionadosEntreDosFechas(LocalDateTime fechaDeInicio, LocalDateTime fechaDeFin) {
+		List<Vehiculo> vehiculosEncontrados = new ArrayList<Vehiculo>();
+		for (Vehiculo vehiculo : cocheras.values()) {
+			if (fechaDeInicio.isBefore(vehiculo.getHoraIngreso())
+					&& fechaDeFin.isAfter(vehiculo.getHoraIngreso()))
+				vehiculosEncontrados.add(vehiculo);
+		}
+		return vehiculosEncontrados;
+	}
+
+	// VALIDACIONES
+
+	public void validacionesAlEstacionar(Integer idCochera, Vehiculo vehiculo)
+			throws PatenteDuplicadaException, CocheraOcupadaException, CocheraInexistenteException {
+		validarPatenteDuplicada(vehiculo);
+		validarCocheraOcupada(idCochera);
+		validarCocheraInexistente(idCochera);
+	}
+
+	public void validarPatenteDuplicada(Vehiculo vehiculo) throws PatenteDuplicadaException {
+		for (Vehiculo vehiculoEncontrado : cocheras.values()) {
+			if (vehiculoEncontrado.getPatente().equals(vehiculo.getPatente()))
+				throw new PatenteDuplicadaException("Patente duplicada");
+		}
+	}
+
+	public void validarCocheraOcupada(Integer idCochera) throws CocheraOcupadaException {
+		if (cocheras.containsKey(idCochera)) 
+			throw new CocheraOcupadaException("Cochera ocupada");
+	}
+
+	public void validarCocheraInexistente(Integer idCochera) throws CocheraInexistenteException {
+		if (idCochera <= 0 || idCochera > 100)
+			throw new CocheraInexistenteException("Cochera inexistente");
+	}
+
+	public void validacionesAlCambiarVehiculoDeCochera(Integer idCocheraOrigen, Vehiculo vehiculo,
+			Integer idCocheraDestino) throws CocheraInexistenteException, VehiculoNoSeEncuentraEnCochera,
+			CocheraOcupadaException, VehiculoNuloException {
+		validarCocheraInexistente(idCocheraOrigen);
+		validarCocheraInexistente(idCocheraDestino);
+		validarVehiculoEstacionadoEnCochera(idCocheraOrigen, vehiculo);
+		validarCocheraOcupada(idCocheraDestino);
+		validarVehiculoNoNulo(vehiculo);
+	}
+
+	private void validarVehiculoEstacionadoEnCochera(Integer idCocheraOrigen, Vehiculo vehiculo)
+			throws VehiculoNoSeEncuentraEnCochera {
+		if (cocheras.get(idCocheraOrigen) != vehiculo) 
+			throw new VehiculoNoSeEncuentraEnCochera();
+	}
+
+	private void validarVehiculoNoNulo(Vehiculo vehiculo) throws VehiculoNuloException {
+		if (vehiculo.equals(null))
+			throw new VehiculoNuloException();
 	}
 
 }
