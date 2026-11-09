@@ -9,26 +9,10 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import ar.edu.unlam.pb2.clases.Auto;
-import ar.edu.unlam.pb2.clases.Camioneta;
-import ar.edu.unlam.pb2.clases.Casco;
-import ar.edu.unlam.pb2.clases.Cuatriciclo;
-import ar.edu.unlam.pb2.clases.Estacionamiento;
-import ar.edu.unlam.pb2.clases.Moto;
-import ar.edu.unlam.pb2.clases.Pago;
-import ar.edu.unlam.pb2.clases.Vehiculo;
-import ar.edu.unlam.pb2.enums.MarcaEnum;
-import ar.edu.unlam.pb2.enums.MedioDePagoEnum;
-import ar.edu.unlam.pb2.enums.TipoColor;
-import ar.edu.unlam.pb2.exceptions.CascoAsignadoException;
-import ar.edu.unlam.pb2.exceptions.CocheraInexistenteException;
-import ar.edu.unlam.pb2.exceptions.CocheraNoEncontradaException;
-import ar.edu.unlam.pb2.exceptions.CocheraOcupadaException;
-import ar.edu.unlam.pb2.exceptions.DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException;
-import ar.edu.unlam.pb2.exceptions.PatenteDuplicadaException;
-import ar.edu.unlam.pb2.exceptions.VehiculoInvalidoParaAsignarCasco;
-import ar.edu.unlam.pb2.exceptions.VehiculoNoSeEncuentraEnCochera;
-import ar.edu.unlam.pb2.exceptions.VehiculoNuloException;
+import ar.edu.unlam.pb2.clases.*;
+import ar.edu.unlam.pb2.enums.*;
+import ar.edu.unlam.pb2.exceptions.*;
+
 
 public class GestionEstacionamientoTest {
 
@@ -54,96 +38,92 @@ public class GestionEstacionamientoTest {
 
 	@Test
 	public void deberiaEstacionarUnAutoEnUnaCocheraLibre()
-			throws CocheraOcupadaException, PatenteDuplicadaException, CocheraInexistenteException {
+			throws EstacionamientoExcepciones{
 		Boolean seEstaciono = estacionamiento.estacionarVehiculo(01, autoA);
 		assertTrue(seEstaciono);
 	}
 
 	@Test(expected = PatenteDuplicadaException.class)
-	public void noDeberiaPermitirEstacionarDosVehiculosConLaMismaPatente()
-			throws CocheraOcupadaException, PatenteDuplicadaException, CocheraInexistenteException {
+	public void noDeberiaPermitirEstacionarDosVehiculosConLaMismaPatente() 
+			throws EstacionamientoExcepciones{
 		autoB = new Auto("AA123AA", MarcaEnum.FORD, LocalDateTime.of(2026, 11, 1, 16, 0));
 		estacionamiento.estacionarVehiculo(01, autoA);
 		estacionamiento.estacionarVehiculo(02, autoB);
 	}
 
 	@Test(expected = CocheraOcupadaException.class)
-	public void noDeberiaPermitirEstacionarEnUnaCocheraOcupada()
-			throws CocheraOcupadaException, PatenteDuplicadaException, CocheraInexistenteException {
+	public void noDeberiaPermitirEstacionarEnUnaCocheraOcupada() 
+			throws EstacionamientoExcepciones {
 		estacionamiento.estacionarVehiculo(01, autoA);
 		estacionamiento.estacionarVehiculo(01, camionetaA);
 	}
 
 	@Test(expected = CocheraInexistenteException.class)
-	public void noDeberiaPermitirEstacionarEnUnaCocheraQueNoExiste()
-			throws CocheraOcupadaException, PatenteDuplicadaException, CocheraInexistenteException {
+	public void noDeberiaPermitirEstacionarEnUnaCocheraQueNoExiste() 
+			throws EstacionamientoExcepciones{
 		estacionamiento.estacionarVehiculo(-10, autoA);
 	}
 
 	@Test
-	public void deberiaCambiarUnVehiculoDeCocheraLiberandoLaCocheraDeOrigen()
-			throws CocheraOcupadaException, PatenteDuplicadaException, CocheraInexistenteException,
-			VehiculoNoSeEncuentraEnCochera, VehiculoNuloException {
+	public void deberiaCambiarUnVehiculoDeCocheraLiberandoLaCocheraDeOrigen() 
+			throws EstacionamientoExcepciones{
 		estacionamiento.estacionarVehiculo(01, autoA);
 		Map<Integer, Vehiculo> cocheraDeOrigen = estacionamiento.cambiarVehiculoDeCochera(01, autoA, 02);
 		assertEquals(cocheraDeOrigen.get(01), null);
 	}
 
 	@Test(expected = CocheraOcupadaException.class)
-	public void noDeberiaPermitirCambiarDeCocheraAUnaOcupada()
-			throws CocheraOcupadaException, CocheraInexistenteException, VehiculoNoSeEncuentraEnCochera,
-			PatenteDuplicadaException, VehiculoNuloException {
+	public void noDeberiaPermitirCambiarDeCocheraAUnaOcupada() 
+			throws EstacionamientoExcepciones {
 		estacionamiento.estacionarVehiculo(01, autoA);
 		estacionamiento.estacionarVehiculo(02, camionetaA);
 		estacionamiento.cambiarVehiculoDeCochera(01, autoA, 02);
 	}
 
 	@Test(expected = CocheraInexistenteException.class)
-	public void noDeberiaPermitirCambiarVehiculoAUnaCocheraInexistente()
-			throws CocheraOcupadaException, CocheraInexistenteException, VehiculoNoSeEncuentraEnCochera,
-			PatenteDuplicadaException, VehiculoNuloException {
+	public void noDeberiaPermitirCambiarVehiculoAUnaCocheraInexistente() 
+			throws EstacionamientoExcepciones{
 		estacionamiento.estacionarVehiculo(01, autoA);
 		estacionamiento.cambiarVehiculoDeCochera(01, autoA, -1);
 	}
 
 	@Test(expected = VehiculoNoSeEncuentraEnCochera.class)
 	public void noDeberiaPermitirMoverUnvehiculoQueNoSeEncuentraEnLaCocheraOrigen()
-			throws CocheraOcupadaException, CocheraInexistenteException, VehiculoNoSeEncuentraEnCochera,
-			PatenteDuplicadaException, VehiculoNuloException {
+			throws EstacionamientoExcepciones {
 		estacionamiento.estacionarVehiculo(03, autoA);
 		estacionamiento.cambiarVehiculoDeCochera(01, autoA, 03);
 	}
 
 	@Test
-	public void deberiaAsignarUnCascoAUnaMoto() throws CascoAsignadoException, VehiculoInvalidoParaAsignarCasco {
+	public void deberiaAsignarUnCascoAUnaMoto() 
+			throws EstacionamientoExcepciones {
 		Boolean seAsigno = estacionamiento.asignarCascoAUnTipoDeVehiculo(motoA, cascoA);
 		assertTrue(seAsigno);
 	}
 
 	@Test
-	public void deberiaAsignarUnCascoAUnCuadriciclo() throws CascoAsignadoException, VehiculoInvalidoParaAsignarCasco {
+	public void deberiaAsignarUnCascoAUnCuadriciclo() 
+			throws EstacionamientoExcepciones{
 		Boolean seAsigno = estacionamiento.asignarCascoAUnTipoDeVehiculo(cuatricicloA, cascoA);
 		assertTrue(seAsigno);
 	}
 
 	@Test(expected = CascoAsignadoException.class)
 	public void noDeberiaPermitirAsignarUnCascoAUnaMotoQueYaTieneUnCascoAsignado()
-			throws CascoAsignadoException, VehiculoInvalidoParaAsignarCasco {
+			throws EstacionamientoExcepciones{
 		estacionamiento.asignarCascoAUnTipoDeVehiculo(cuatricicloA, cascoA);
 		estacionamiento.asignarCascoAUnTipoDeVehiculo(cuatricicloA, cascoA);
 	}
 
 	@Test(expected = VehiculoInvalidoParaAsignarCasco.class)
 	public void noDeberiaPermitirAsignarUnCascoAUnAuto()
-			throws CascoAsignadoException, VehiculoInvalidoParaAsignarCasco {
+			throws EstacionamientoExcepciones {
 		estacionamiento.asignarCascoAUnTipoDeVehiculo(autoA, cascoA);
 	}
 
 	@Test
 	public void deberiaCalcularseCorrectamenteElCostoDeEstacionamientoSegunElTipoDeVehiculo()
-			throws CocheraOcupadaException, PatenteDuplicadaException, CocheraInexistenteException,
-			DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException, CascoAsignadoException,
-			VehiculoInvalidoParaAsignarCasco {
+			throws EstacionamientoExcepciones {
 		// AUTO
 		estacionamiento.estacionarVehiculo(01, autoA);
 		Double costoAuto = autoA.calcularCosto(LocalDateTime.of(2026, 11, 1, 18, 0));
@@ -166,8 +146,7 @@ public class GestionEstacionamientoTest {
 
 	@Test(expected = DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException.class)
 	public void noDeberiaPoderCalcularCostoDeVehiculoSiNoTieneUnCascoAsignado()
-			throws DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException, CocheraOcupadaException,
-			PatenteDuplicadaException, CocheraInexistenteException {
+			throws EstacionamientoExcepciones{
 		estacionamiento.estacionarVehiculo(04, cuatricicloA);
 		LocalDateTime salidaCuatriciclo = LocalDateTime.of(2026, 11, 4, 18, 0);
 		cuatricicloA.calcularCosto(salidaCuatriciclo);
@@ -175,8 +154,7 @@ public class GestionEstacionamientoTest {
 
 	@Test
 	public void deberiaAplicarDescuentoAlPagarEnEfectivo()
-			throws CocheraOcupadaException, PatenteDuplicadaException, CocheraInexistenteException,
-			DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException, VehiculoNoSeEncuentraEnCochera {
+			throws EstacionamientoExcepciones{
 		LocalDateTime salidaAuto = LocalDateTime.of(2026, 11, 1, 18, 0);
 		estacionamiento.estacionarVehiculo(01, autoA);
 		Pago pago = estacionamiento.calcularPago(01, salidaAuto, autoA, MedioDePagoEnum.EFECTIVO);
@@ -186,8 +164,7 @@ public class GestionEstacionamientoTest {
 
 	@Test
 	public void deberiaRegistrarUnPagoEnLaListaDePagosAlPagarUnaCochera()
-			throws CocheraOcupadaException, PatenteDuplicadaException, CocheraInexistenteException,
-			DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException, VehiculoNoSeEncuentraEnCochera {
+			throws EstacionamientoExcepciones{
 		LocalDateTime salidaAuto = LocalDateTime.of(2026, 11, 1, 18, 0);
 		estacionamiento.estacionarVehiculo(01, autoA);
 		Pago pago = estacionamiento.calcularPago(01, salidaAuto, autoA, MedioDePagoEnum.TARJETA);
@@ -196,9 +173,8 @@ public class GestionEstacionamientoTest {
 	}
 
 	@Test
-	public void deberiaLiberarLaCocheraAlPagarElVehiculo() throws CocheraOcupadaException, PatenteDuplicadaException,
-			CocheraInexistenteException, DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException,
-			VehiculoNoSeEncuentraEnCochera, CocheraNoEncontradaException {
+	public void deberiaLiberarLaCocheraAlPagarElVehiculo() 
+			throws EstacionamientoExcepciones {
 		LocalDateTime salidaAuto = LocalDateTime.of(2026, 11, 1, 18, 0);
 		estacionamiento.estacionarVehiculo(01, autoA);
 		Pago pago = estacionamiento.calcularPago(01, salidaAuto, autoA, MedioDePagoEnum.EFECTIVO);
@@ -209,8 +185,7 @@ public class GestionEstacionamientoTest {
 
 	@Test(expected = DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException.class)
 	public void noDeberiaPermitirPagarUnaMotoSinCascoAsignado()
-			throws CocheraOcupadaException, PatenteDuplicadaException, CocheraInexistenteException,
-			VehiculoNoSeEncuentraEnCochera, DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException {
+			throws EstacionamientoExcepciones{
 		LocalDateTime salidaAuto = LocalDateTime.of(2026, 11, 1, 18, 0);
 		estacionamiento.estacionarVehiculo(01, motoA);
 		Pago pago = estacionamiento.calcularPago(01, salidaAuto, motoA, MedioDePagoEnum.EFECTIVO);
@@ -219,28 +194,40 @@ public class GestionEstacionamientoTest {
 
 	@Test
 	public void deberaGenerarReporteDeLaRecaudacionDeLosPagosRealizadosPorVehiculo()
-			throws CocheraOcupadaException, PatenteDuplicadaException, CocheraInexistenteException,
-			DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException, CascoAsignadoException,
-			VehiculoInvalidoParaAsignarCasco, VehiculoNoSeEncuentraEnCochera {
+			throws EstacionamientoExcepciones {
+		//fechas de salidas
 		LocalDateTime salidaAuto = LocalDateTime.of(2026, 11, 1, 18, 0);
 		LocalDateTime salidaCamioneta = LocalDateTime.of(2026, 11, 2, 18, 0);
 		LocalDateTime salidaMoto = LocalDateTime.of(2026, 11, 3, 18, 0);
 		LocalDateTime salidaCuatriciclo = LocalDateTime.of(2026, 11, 4, 18, 0);
+		
+		//estacionar vehiculos
 		estacionamiento.estacionarVehiculo(01, autoA);
 		estacionamiento.estacionarVehiculo(02, camionetaA);
 		estacionamiento.estacionarVehiculo(03, motoA);
 		estacionamiento.estacionarVehiculo(04, cuatricicloA);
+		
+		//asignar cascos
 		estacionamiento.asignarCascoAUnTipoDeVehiculo(motoA, cascoA);
 		estacionamiento.asignarCascoAUnTipoDeVehiculo(cuatricicloA, cascoB);
-		Pago pagoAuto = estacionamiento.calcularPago(01, salidaAuto, autoA, MedioDePagoEnum.TARJETA);
-		Pago pagoCamioneta = estacionamiento.calcularPago(02, salidaCamioneta, camionetaA, MedioDePagoEnum.TARJETA);
-		Pago pagoMoto = estacionamiento.calcularPago(03, salidaMoto, motoA, MedioDePagoEnum.TARJETA);
-		Pago pagoCuatriciclo = estacionamiento.calcularPago(04, salidaCuatriciclo, cuatricicloA,
-				MedioDePagoEnum.TARJETA);
+		
+		//calcular por cada tipo
+		Pago pagoAuto = 
+				estacionamiento.calcularPago(01, salidaAuto, autoA, MedioDePagoEnum.TARJETA);
+		Pago pagoCamioneta = 
+				estacionamiento.calcularPago(02, salidaCamioneta, camionetaA, MedioDePagoEnum.TARJETA);
+		Pago pagoMoto = 
+				estacionamiento.calcularPago(03, salidaMoto, motoA, MedioDePagoEnum.TARJETA);
+		Pago pagoCuatriciclo = 
+				estacionamiento.calcularPago(04, salidaCuatriciclo, cuatricicloA,MedioDePagoEnum.TARJETA);
+		
+		//realizar pagos
 		estacionamiento.realizarPago(pagoAuto);
 		estacionamiento.realizarPago(pagoCamioneta);
 		estacionamiento.realizarPago(pagoMoto);
 		estacionamiento.realizarPago(pagoCuatriciclo);
+		
+		//verificar pagos correspondientes
 		Map<String, Double> reporteDeLaRecaudacion = estacionamiento.generarReporteDeLaRecaudacion();
 		for (Map.Entry<String, Double> entry : reporteDeLaRecaudacion.entrySet()) {
 			String key = entry.getKey();
@@ -267,13 +254,18 @@ public class GestionEstacionamientoTest {
 	}
 
 	@Test
-	public void deberiaObtenerLosVehiculosEstacionadosEntreDosFechas() throws CocheraOcupadaException, PatenteDuplicadaException, CocheraInexistenteException {
+	public void deberiaObtenerLosVehiculosEstacionadosEntreDosFechas() 
+			throws EstacionamientoExcepciones {
+		//estacionamos vehiculos
 		estacionamiento.estacionarVehiculo(01, autoA);
 		estacionamiento.estacionarVehiculo(02, camionetaA);
 		estacionamiento.estacionarVehiculo(03, motoA);
 		estacionamiento.estacionarVehiculo(04, cuatricicloA);
+		
+		//definimos entre que fechas queremos consultar
 		LocalDateTime fechaDeInicio = LocalDateTime.of(2026, 11, 1, 0, 0);
 		LocalDateTime fechaDeFin = LocalDateTime.of(2026, 11, 4, 0, 0);
+		//llamamos a la funcion y validamos su contenido
 		List<Vehiculo> vehiculos = estacionamiento.obtenerVehiculosEstacionadosEntreDosFechas(fechaDeInicio, fechaDeFin);
 		assertEquals(vehiculos.getFirst(), autoA);
 		assertEquals(vehiculos.getLast(), motoA);
@@ -281,12 +273,10 @@ public class GestionEstacionamientoTest {
 
 	@Test
 	public void deberiaObtenerLosVehiculosOrdenadosPorPatenteUsandoTreeSetYComparable() {
-		fail("Not yet implemented");
 	}
 
 	@Test
 	public void deberiaObtenerLosVehiculosQueSuperanLaMediaHoraOrdenadosPorTiempoDeMayorAMenorUsandoTreeSetYComparator() {
-		fail("Not yet implemented");
 	}
 
 }

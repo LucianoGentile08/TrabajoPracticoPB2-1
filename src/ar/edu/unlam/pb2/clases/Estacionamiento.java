@@ -132,18 +132,18 @@ public class Estacionamiento {
 	public void validarPatenteDuplicada(Vehiculo vehiculo) throws PatenteDuplicadaException {
 		for (Vehiculo vehiculoEncontrado : cocheras.values()) {
 			if (vehiculoEncontrado.getPatente().equals(vehiculo.getPatente()))
-				throw new PatenteDuplicadaException("Patente duplicada");
+				throw new PatenteDuplicadaException();
 		}
 	}
 
 	public void validarCocheraOcupada(Integer idCochera) throws CocheraOcupadaException {
 		if (cocheras.containsKey(idCochera)) 
-			throw new CocheraOcupadaException("Cochera ocupada");
+			throw new CocheraOcupadaException();
 	}
 
 	public void validarCocheraInexistente(Integer idCochera) throws CocheraInexistenteException {
 		if (idCochera <= 0 || idCochera > 100)
-			throw new CocheraInexistenteException("Cochera inexistente");
+			throw new CocheraInexistenteException();
 	}
 
 	public void validacionesAlCambiarVehiculoDeCochera(Integer idCocheraOrigen, Vehiculo vehiculo,

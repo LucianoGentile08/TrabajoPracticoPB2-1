@@ -1,7 +1,7 @@
 package ar.edu.unlam.pb2.exceptions;
 
-public class CocheraInexistenteException extends Exception {
-	public CocheraInexistenteException(String mensaje) {
-		super(mensaje);
+public class CocheraInexistenteException extends EstacionamientoExcepciones {
+	public CocheraInexistenteException() {
+		super("Cochera inexistente");
 	}
 }
