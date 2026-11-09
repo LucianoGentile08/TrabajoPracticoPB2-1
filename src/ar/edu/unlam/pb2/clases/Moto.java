@@ -8,32 +8,14 @@ import ar.edu.unlam.pb2.exceptions.CascoAsignadoException;
 import ar.edu.unlam.pb2.exceptions.DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException;
 import ar.edu.unlam.pb2.interfaces.Asignable;
 
-public class Moto extends Vehiculo implements Asignable{
+public class Moto extends Vehiculo implements Asignable {
 	private Casco casco;
+
 	public Moto(String patente, MarcaEnum marca, LocalDateTime horaIngreso) {
 		super(patente, marca, horaIngreso);
 		this.casco = null;
 	}
-
-	@Override
-	public Double calcularCosto(LocalDateTime horaDeSalida) throws DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException {
-		if(getCasco() == null) {
-			throw new DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException();
-		}
-		double minutosExactos = Duration.between(getHoraIngreso(), horaDeSalida).toMinutes();
-		Double costo = (minutosExactos / 60.0) * 500.0;
-		return costo;
-	}
-
-	@Override
-	public Boolean asignarCasco(Casco casco) throws CascoAsignadoException {
-		if(getCasco() == null) {
-			setCasco(casco);
-			return true;
-		}
-		throw new CascoAsignadoException();
-	}
-
+	
 	public Casco getCasco() {
 		return casco;
 	}
@@ -42,4 +24,30 @@ public class Moto extends Vehiculo implements Asignable{
 		this.casco = casco;
 	}
 	
+	@Override
+	public Boolean asignarCasco(Casco casco) throws CascoAsignadoException {
+	    validarQueNoTengaCascoAsignado();
+	    setCasco(casco);
+	    return true;
+	}
+
+	public void validarQueNoTengaCascoAsignado() throws CascoAsignadoException {
+	    if (getCasco() != null)
+	        throw new CascoAsignadoException();
+	}
+
+	@Override
+	public Double calcularCosto(LocalDateTime horaDeSalida)
+	        throws DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException {
+	    validarQueTengaCascoAsignado();
+	    double minutosExactos = Duration.between(getHoraIngreso(), horaDeSalida).toMinutes();
+	    return (minutosExactos / 60.0) * 500.0;
+	}
+
+	public void validarQueTengaCascoAsignado()
+	        throws DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException {
+	    if (getCasco() == null)
+	        throw new DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException();
+	}	
+
 }

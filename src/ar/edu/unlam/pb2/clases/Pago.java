@@ -8,12 +8,12 @@ public class Pago {
 	private Vehiculo vehiculo;
 	private Double monto;
 	private MedioDePagoEnum medioDePago;
-	private LocalDateTime fecha;
-	public Pago(Vehiculo vehiculo, Double monto, MedioDePagoEnum medioDePago, LocalDateTime fecha) {
+	private LocalDateTime fechaDePago;
+	public Pago(Vehiculo vehiculo, Double monto, MedioDePagoEnum medioDePago, LocalDateTime fechaDePago) {
 		this.vehiculo = vehiculo;
 		this.monto = monto;
 		this.medioDePago = medioDePago;
-		this.fecha = fecha;
+		this.fechaDePago = fechaDePago;
 	}
 
 	public Double getMonto() {
@@ -22,13 +22,12 @@ public class Pago {
 	public MedioDePagoEnum getMedioDePago() {
 		return medioDePago;
 	}
-	public LocalDateTime getFecha() {
-		return fecha;
+	public LocalDateTime getFechaDePago() {
+		return fechaDePago;
 	}
 
 	public Vehiculo getVehiculo() {
 		return vehiculo;
 	}
-	
 	
 }

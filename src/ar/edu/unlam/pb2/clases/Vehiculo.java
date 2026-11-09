@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import ar.edu.unlam.pb2.enums.MarcaEnum;
+import ar.edu.unlam.pb2.exceptions.CascoAsignadoException;
 import ar.edu.unlam.pb2.exceptions.DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException;
 
 public abstract class Vehiculo {
@@ -19,9 +20,7 @@ public abstract class Vehiculo {
 		this.horaIngreso = horaIngreso;
 		this.horaSalida = null;
 	}
-
-	public abstract Double calcularCosto(LocalDateTime horaDeSalida) throws DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException;
-
+	
 	public String getPatente() {
 		return patente;
 	}
@@ -52,4 +51,7 @@ public abstract class Vehiculo {
 		Vehiculo other = (Vehiculo) obj;
 		return Objects.equals(patente, other.patente);
 	}
+
+	public abstract Double calcularCosto(LocalDateTime horaDeSalida) throws DebeTenerCascoParaPoderCalcularSuCostoDeSalidaException;
+	
 }

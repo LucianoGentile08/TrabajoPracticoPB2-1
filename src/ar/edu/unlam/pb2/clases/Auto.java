@@ -14,7 +14,6 @@ public class Auto extends Vehiculo {
 	@Override
 	public Double calcularCosto(LocalDateTime horaDeSalida) {
 		double minutosExactos = Duration.between(getHoraIngreso(), horaDeSalida).toMinutes();
-		Double costo = (minutosExactos / 60.0) * 1000.0;
-		return costo;
+		return (minutosExactos / 60.0) * 1000.0;
 	}
 }

@@ -15,7 +15,6 @@ public class Camioneta extends Vehiculo {
 	public Double calcularCosto(LocalDateTime horaDeSalida) {
 		Double recargo = 50.0;
 		double minutosExactos = Duration.between(getHoraIngreso(), horaDeSalida).toMinutes();
-		Double costo = (minutosExactos / 60.0) * 1000.0 * (1 + recargo / 100);
-		return costo;
+		return (minutosExactos / 60.0) * 1000.0 * (1 + recargo / 100);
 	}
 }
